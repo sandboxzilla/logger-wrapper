@@ -172,7 +172,7 @@ class LoggerWrapper(logging.Logger):
                     paths.append(str(handler.stream.name))
                 elif isinstance(handler, (hdls.SysLogHandler,
                                           hdls.SocketHandler)):
-                    paths.append(str(handler.stream.address))
+                    paths.append(str(handler.address))
                 elif isinstance(handler, hdls.SMTPHandler):
                     paths.append(handler.toaddrs)
                 elif isinstance(handler, hdls.BufferingHandler):
@@ -214,6 +214,7 @@ class LoggerWrapper(logging.Logger):
 if __name__ == "__main__":
     name = None
     handlers = [logging.StreamHandler(),
+                logging.FileHandler("test.logs"),
                 hdls.SysLogHandler(address='/dev/log'),
                 ]
     log = LoggerWrapper(name=name,
@@ -223,11 +224,9 @@ if __name__ == "__main__":
                         handlers=handlers)
 
     print("version: " + log.version)
-
     print(str(log.get_output_path()))
 
     for count in range(10):
-        time.sleep(0.499)
         if count == 5:
             log.remove_handler(logging.StreamHandler)
         log.info("test of " + str(count))
