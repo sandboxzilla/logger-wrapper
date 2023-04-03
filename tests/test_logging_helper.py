@@ -21,7 +21,7 @@ import inspect
 import logging
 import os
 import shutil
-import sys
+import time
 import tempfile
 import unittest
 from pathlib import Path
@@ -42,27 +42,30 @@ class TestLoggingHelper(unittest.TestCase):
     def setUp(self):
         # create a temporary directory to store logs
         self.logs_dir = tempfile.mkdtemp()
+        self.file_path = str(os.path.join(self.logs_dir, "test_logging_helper.log"))
+        self.logger = LoggingHelper(name="test_logging_helper",
+                                    date_filename=False,
+                                    handlers=[logging.StreamHandler(), logging.FileHandler(self.file_path)])
 
     def tearDown(self):
+        self.logger.remove_handler(logging.Handler)
+
         # remove the temporary logs directory
         shutil.rmtree(self.logs_dir)
 
     def test_file_logging(self):
         # given
-        log_path = Path(self.logs_dir, "test_file_handler.log")
-        logger = LoggingHelper(name="test_file_handler",
-                               date_filename=False,
-                               handlers=[logging.FileHandler(str(log_path))])
 
         # when
-        logger.debug("debug message")
-        logger.info("info message")
-        logger.warning("warning message")
-        logger.error("error message")
-        logger.critical("critical message")
+        self.logger.debug("debug message")
+        self.logger.info("info message")
+        self.logger.warning("warning message")
+        self.logger.error("error message")
+        self.logger.critical("critical message")
+        time.sleep(1)
 
         # then
-        with open(log_path, "r") as f:
+        with open(self.file_path, "r") as f:
             contents = f.read()
             self.assertIn("debug message", contents)
             self.assertIn("info message", contents)
@@ -72,26 +75,21 @@ class TestLoggingHelper(unittest.TestCase):
 
     def test_get_output_path(self):
         # given
-        file_path = str(os.path.join(self.logs_dir, "test_get_output_path.log"))
-        logger = LoggingHelper(name="test_get_output_path",
-                               date_filename=False,
-                               handlers=[logging.StreamHandler(), logging.FileHandler(file_path)])
-        expected_paths = ['<stderr>', file_path]
+        expected_paths = ['<stderr>', self.file_path]
 
         # when
-        paths = logger.get_output_path()
+        paths = self.logger.get_output_path()
 
         # then
         self.assertListEqual(paths, expected_paths)
 
     def test_remove_handler(self):
         # given
-        logger = LoggingHelper(name="test_remove_handler")
-        old_num_handlers = len(logger.handlers)
+        old_num_handlers = len(self.logger.handlers)
 
         # when
-        logger.remove_handler(logging.StreamHandler)
-        new_num_handlers = len(logger.handlers)
+        self.logger.remove_handler(logging.StreamHandler)
+        new_num_handlers = len(self.logger.handlers)
 
         # then
         self.assertEqual(new_num_handlers, old_num_handlers - 1)
@@ -105,3 +103,7 @@ class TestLoggingHelper(unittest.TestCase):
 
         # then
         self.assertEqual(version, expected_version)
+
+
+if __name__ == "__main__":
+    unittest.main()
