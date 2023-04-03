@@ -2,11 +2,11 @@
 """
  **[LogHelper Package]**
 
-This package provides a wrapper for the built - in logger:
+This package provides a wrapper for the built - in logging.Logger:
 
 **LogHelper:**
 
-The LogHelper class wraps the logger package to pre-configure some of
+The LogHelper class wraps the logging.Logger class to pre-configure some of
 the common tasks like formating.
 
 The LogHelper class has the following methods::
@@ -34,18 +34,18 @@ from logging import handlers as hdls
 if __name__ == "__main__":
     name = None
     handlers = [logging.StreamHandler(), hdls.SysLogHandler(address='/dev/log')]
-    logger = LogHelper(name=name,
-                           level=logging.DEBUG,
-                           date_filename=True,
-                           meta=True,
-                           handlers=handlers)
+    log = LogHelper(name=name,
+                    level=logging.DEBUG,
+                    date_filename=True,
+                    meta=True,
+                    handlers=handlers)
 
-    print("version: " + logger.version)
+    print("version: " + log.version)
 
     for count in range(10):
         if count == 5:
-            logger.remove_handler(logging.StreamHandler)
-        logger.info("test of " + str(count))
+            log.remove_handler(logging.StreamHandler)
+        log.info("test of " + str(count))
 < / code >
 
     Copyright (c)  2023.  Erol Yesin/Sandboxzilla
