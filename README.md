@@ -2,7 +2,7 @@
 
 This package provides a wrapper for the built-in logging.Logger class:
 
-## **LoggerWrapper:**
+## **LoggerWrapper ::**
 
 The LoggerWrapper class wraps the logging.Logger to pre-configure some of the common tasks like formating.
 
@@ -15,7 +15,7 @@ The LoggerWrapper class has the following methods::
 >
 >  *version():* The package version.
 
-## Example Usage::
+## Example Usage ::
 
 ```python
 import logging
@@ -42,7 +42,7 @@ if __name__ == "__main__":
         log.info("test of " + str(count))
 ```
 
-### Console::
+### Console ::
 
 > version: 0.0.1\
 > ['<stderr>', '/home/erol/workspace/logger-wrapper/test_20230403044423.logs', '/dev/log']\
@@ -52,7 +52,7 @@ if __name__ == "__main__":
 > 2023-04-03 04:44:24,004,[INFO:pid=950586:MainThread:logger_wrapper:<module>:232],test of 3\
 > 2023-04-03 04:44:24,004,[INFO:pid=950586:MainThread:logger_wrapper:<module>:232],test of 4
 
-### cat test_20230403044423.logs::
+### cat test_20230403044423.logs ::
 
 > 2023-04-03 04:44:24,003,[INFO:pid=950586:MainThread:logger_wrapper:<module>:232],test of 0\
 > 2023-04-03 04:44:24,004,[INFO:pid=950586:MainThread:logger_wrapper:<module>:232],test of 1\
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 > 2023-04-03 04:44:24,005,[INFO:pid=950586:MainThread:logger_wrapper:<module>:232],test of 8\
 > 2023-04-03 04:44:24,005,[INFO:pid=950586:MainThread:logger_wrapper:<module>:232],test of 9
 
-### cat /var/log/syslog |grep logger_wrapper
+### cat /var/log/syslog |grep logger_wrapper ::
 
 > Apr  3 04:44:24 erol-ub01 2023-04-03 04:44:24,003,[INFO:pid=950586:MainThread:logger_wrapper:<module>:232],test of 0\
 > Apr  3 04:44:24 erol-ub01 2023-04-03 04:44:24,004,[INFO:pid=950586:MainThread:logger_wrapper:<module>:232],test of 1\
