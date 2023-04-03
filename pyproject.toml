@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "logger_helper"
+version = "0.0.1"
+authors = [
+  { name="Erol Yesin", email="erol@sandboxzilla.net" },
+]
+description = "The package wraps the built-in logger.  There are options to track the code location from where the log message was created."
+readme = "README.md"
+requires-python = ">=3.10"
+keywords=["logger", "syslog", "location"]
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'Topic :: Software Development :: Build Tools',
+    'License :: OSI Approved :: MIT License',
+    'Programming Language :: Python :: 3.10',
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/erolyesin/logger_helper"
+"Bug Tracker" = "https://https://github.com/erolyesin/logger_helper/issues"
