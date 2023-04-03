@@ -1,12 +1,12 @@
-# LogHelper Package
+# LoggerWrapper Package
 
 This package provides a wrapper for the built-in logging.Logger class:
 
-## **LogHelper:**
+## **LoggerWrapper:**
 
-The LogHelper class wraps the logging.Logger to pre-configure some of the common tasks like formating.
+The LoggerWrapper class wraps the logging.Logger to pre-configure some of the common tasks like formating.
 
-The LogHelper class has the following methods::
+The LoggerWrapper class has the following methods::
 
 >  *get_output_path(handler_type: logging.Handler=None):* Tries to retrieve a list of output targets of the handler that matches the type passed in.  If handler_type is None, all the output targets for all the registered handlers are returned.
 >       *NOTE:* Not fully tested
@@ -24,11 +24,11 @@ from logging import handlers as hdls
 if __name__ == "__main__":
     name = None
     handlers = [logging.StreamHandler(), hdls.SysLogHandler(address='/dev/log')]
-    log = LogHelper(name=name,
-                    level=logging.DEBUG,
-                    date_filename=True,
-                    meta=True,
-                    handlers=handlers)
+    log = LoggerWrapper(name=name,
+                        level=logging.DEBUG,
+                        date_filename=True,
+                        meta=True,
+                        handlers=handlers)
 
     print("version: " + log.version)
 

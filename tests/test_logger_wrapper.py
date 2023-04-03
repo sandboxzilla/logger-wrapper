@@ -32,20 +32,20 @@ currentdir = os.path.dirname(os.path.abspath(
     inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir) + '/src'
 os.sys.path.insert(0, parentdir)
-parentdir = parentdir + '/log_helper'
+parentdir = parentdir + '/log_wrapper'
 os.sys.path.insert(0, parentdir)
 
-from log_helper import LogHelper
+from logger_wrapper import LoggerWrapper
 
 
 class TestLoggingHelper(unittest.TestCase):
     def setUp(self):
         # create a temporary directory to store logs
         self.logs_dir = tempfile.mkdtemp()
-        self.file_path = str(os.path.join(self.logs_dir, "test_log_helper.log"))
-        self.logger = LogHelper(name="test_log_helper",
-                                date_filename=False,
-                                handlers=[logging.StreamHandler(), logging.FileHandler(self.file_path)])
+        self.file_path = str(os.path.join(self.logs_dir, "test_log_wrapper.log"))
+        self.logger = LoggerWrapper(name="test_log_wrapper",
+                                    date_filename=False,
+                                    handlers=[logging.StreamHandler(), logging.FileHandler(self.file_path)])
 
     def tearDown(self):
         self.logger.remove_handler(logging.Handler)
@@ -99,7 +99,7 @@ class TestLoggingHelper(unittest.TestCase):
         expected_version = "0.0.1"
 
         # when
-        version = LogHelper.version
+        version = LoggerWrapper.version
 
         # then
         self.assertEqual(version, expected_version)

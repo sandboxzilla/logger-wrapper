@@ -34,4 +34,4 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
-from .log_helper import LogHelper
+from .logger_wrapper import LoggerWrapper
