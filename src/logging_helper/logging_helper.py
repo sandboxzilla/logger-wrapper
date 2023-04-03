@@ -175,12 +175,15 @@ class LoggingHelper(logging.Logger):
                     paths.append(str(handler.stream.address))
                 elif isinstance(handler, hdls.SMTPHandler):
                     paths.append(handler.toaddrs)
-                elif isinstance(handler. hdls.BufferingHandler):
+                elif isinstance(handler, hdls.BufferingHandler):
                     paths.append("<mem>")
-                elif isinstance(handler. hdls.HTTPHandler):
+                elif isinstance(handler, hdls.HTTPHandler):
                     paths.append(handler.url)
-                elif isinstance(handler. hdls.QueueHandler):
+                elif isinstance(handler, hdls.QueueHandler):
                     paths.append("<queue>")
+                elif isinstance(handler, logging.StreamHandler):
+                    paths.append(handler.stream.name)
+        return paths
 
     @classmethod
     def remove_handler(cls, handler_type: logging.Handler):
