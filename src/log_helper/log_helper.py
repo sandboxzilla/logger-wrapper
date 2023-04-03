@@ -1,15 +1,15 @@
 #!/bin/python3
 """
- **[LoggingHelper Package]**
+ **[LogHelper Package]**
 
 This package provides a wrapper for the built - in logger:
 
-**LoggingHelper:**
+**LogHelper:**
 
-The LoggingHelper class wraps the logger package to pre-configure some of
+The LogHelper class wraps the logger package to pre-configure some of
 the common tasks like formating.
 
-The LoggingHelper class has the following methods::
+The LogHelper class has the following methods::
 
     *get_output_path(handler_type: logging.Handler=None):*  Tries to retrieve
     a list of output targets of the handler that matches the type passed in.
@@ -34,7 +34,7 @@ from logging import handlers as hdls
 if __name__ == "__main__":
     name = None
     handlers = [logging.StreamHandler(), hdls.SysLogHandler(address='/dev/log')]
-    logger = LoggingHelper(name=name,
+    logger = LogHelper(name=name,
                            level=logging.DEBUG,
                            date_filename=True,
                            meta=True,
@@ -76,7 +76,7 @@ from logging import handlers as hdls
 from pathlib import PosixPath
 
 
-class LoggingHelper(logging.Logger):
+class LogHelper(logging.Logger):
     """
     A helper class that subclasses the Logger class from the logging module and
     provides a configurable logger.
@@ -109,16 +109,16 @@ class LoggingHelper(logging.Logger):
                 date_filename: bool = True,
                 handlers: Iterable[logging.Handler] = [logging.StreamHandler()]) -> logging.Logger:
 
-        if LoggingHelper.__instance is None:
+        if LogHelper.__instance is None:
 
-            LoggingHelper.__instance = logging.getLogger(name=str(name))
-            LoggingHelper.__instance.setLevel(level=level)
+            LogHelper.__instance = logging.getLogger(name=str(name))
+            LogHelper.__instance.setLevel(level=level)
 
             if meta:
-                LoggingHelper.__instance.formatter = logging.Formatter(
+                LogHelper.__instance.formatter = logging.Formatter(
                     '%(asctime)s,[%(levelname)s:pid=%(process)d:%(threadName)s:%(module)s:%(funcName)s:%(lineno)d],%(message)s')
             else:
-                LoggingHelper.__instance.formatter = logging.Formatter('%(asctime)s,%(message)s')
+                LogHelper.__instance.formatter = logging.Formatter('%(asctime)s,%(message)s')
 
             for handler in handlers:
                 if not isinstance(handler, logging.Handler):
@@ -145,14 +145,14 @@ class LoggingHelper(logging.Logger):
                                                       delay=handler_dict["delay"],
                                                       errors=handler_dict["errors"])
 
-                handler.setFormatter(LoggingHelper.__instance.formatter)
-                LoggingHelper.__instance.addHandler(handler)
+                handler.setFormatter(LogHelper.__instance.formatter)
+                LogHelper.__instance.addHandler(handler)
 
-            LoggingHelper.__instance.get_output_path = cls.get_output_path
-            LoggingHelper.__instance.remove_handler = cls.remove_handler
-            LoggingHelper.__instance.version = cls.version
+            LogHelper.__instance.get_output_path = cls.get_output_path
+            LogHelper.__instance.remove_handler = cls.remove_handler
+            LogHelper.__instance.version = cls.version
 
-        return LoggingHelper.__instance
+        return LogHelper.__instance
 
     @classmethod
     def get_output_path(cls, handler_type: logging.Handler = None) -> Iterable[str]:
@@ -166,7 +166,7 @@ class LoggingHelper(logging.Logger):
         NOTE: Not fully tested
         """
         paths = []
-        for handler in LoggingHelper.__instance.handlers:
+        for handler in LogHelper.__instance.handlers:
             if isinstance(handler, logging.Handler):
                 if handler_type and isinstance(handler, handler_type):
                     paths.append(str(handler.stream.name))
@@ -195,9 +195,9 @@ class LoggingHelper(logging.Logger):
                                             If the top level handler (logging.Handler)
                                             is given, all handlers will be removed.
         """
-        for handler in LoggingHelper.__instance.handlers:
+        for handler in LogHelper.__instance.handlers:
             if isinstance(handler, handler_type):
-                LoggingHelper.__instance.handlers.remove(handler)
+                LogHelper.__instance.handlers.remove(handler)
 
     @classmethod
     @property
@@ -216,11 +216,11 @@ if __name__ == "__main__":
     handlers = [logging.StreamHandler(),
                 hdls.SysLogHandler(address='/dev/log'),
                 ]
-    logger = LoggingHelper(name=name,
-                           level=logging.DEBUG,
-                           date_filename=True,
-                           meta=True,
-                           handlers=handlers)
+    logger = LogHelper(name=name,
+                       level=logging.DEBUG,
+                       date_filename=True,
+                       meta=True,
+                       handlers=handlers)
 
     print("version: " + logger.version)
 

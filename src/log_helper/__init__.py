@@ -1,7 +1,7 @@
 #!/bin/python3
 
 """
-logging_helper package
+log_helper package
 
 Author: Erol Yesin
 Version: 0.0.1
@@ -34,4 +34,4 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 """
 
-from .logging_helper import LoggingHelper
+from .log_helper import LogHelper
