@@ -15,6 +15,7 @@ The LoggingHelper class has the following methods::
     a list of output targets of the handler that matches the type passed in.
     If handler_type is None, all the output targets for all the registered
     handlers are returned.
+    *NOTE:* Not fully tested
 
     *remove_handler(handler_type: logging.Handler=None):*  Removes the handlers
     that matches the type passed in . If the handler_type is None or the
@@ -162,6 +163,7 @@ class LoggingHelper(logging.Logger):
             handler_type (logging.Handler): The handler type of interest.
                                             If None all handlers' output path
                                             will be returned in a list.
+        NOTE: Not fully tested
         """
         paths = []
         for handler in LoggingHelper.__instance.handlers:
@@ -209,15 +211,7 @@ class LoggingHelper(logging.Logger):
 if __name__ == "__main__":
     name = None
     handlers = [logging.StreamHandler(),
-                logging.FileHandler('/home/erol/logs/test'),
                 hdls.SysLogHandler(address='/dev/log'),
-                hdls.SocketHandler(),
-                hdls.DatagramHandler(),
-                hdls.SMTPHandler(),
-                hdls.HTTPHandler(),
-                hdls.QueueHandler(),
-                hdls.RotatingFileHandler('/home/erol/logs/test'),
-                hdls.TimedRotatingFileHandler('/home/erol/logs/test'),
                 ]
     logger = LoggingHelper(name=name,
                            level=logging.DEBUG,

@@ -12,6 +12,7 @@ The LoggingHelper class wraps the logger package to pre-configure some of the co
 The LoggingHelper class has the following methods::
 
 >  *get_output_path(handler_type: logging.Handler=None):* Tries to retrieve a list of output targets of the handler that matches the type passed in.  If handler_type is None, all the output targets for all the registered handlers are returned.
+>       *NOTE:* Not fully tested
 >
 >  *remove_handler(handler_type: logging.Handler=None):* Removes the handlers that matches the type passed in. If the handler_type is None or the handler_type is not registered,none of the handlers will be removed.  If an abstract handler is given, all handler that have inherited will be removed.
 >
