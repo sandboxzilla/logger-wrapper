@@ -2,9 +2,6 @@
 
 This package provides a wrapper for the built-in logger:
 
-> *LoggingHelper:* A class for creating and managing events with callback routines.
->     This class can be used independently of TimerEvent for handling general event-driven scenarios without any time-based requirements.
-
 ## **LoggingHelper:**
 
 The LoggingHelper class wraps the logger package to pre-configure some of the common tasks like formating.
