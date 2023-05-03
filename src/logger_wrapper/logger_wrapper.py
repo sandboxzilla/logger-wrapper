@@ -100,7 +100,7 @@ class SingletonLogger(logging.Logger):
                 handlers=None):
 
         if SingletonLogger.__instance is None:
-            SingletonLogger.__instance = logging.Logger(name, level)
+            SingletonLogger.__instance = super.__new__(cls, name, level)
             SingletonLogger.__instance.setLevel(level)
 
             if handlers is None:
@@ -268,7 +268,7 @@ class LoggerWrapper(logging.Logger):
                  date_filename: bool = True,
                  handlers=None):
 
-        super().__init__(name, level=level)
+        super.__init__(name, level=level)
         self.logger = SingletonLogger(name=name,
                                       app_name=app_name,
                                       level=level,
