@@ -43,9 +43,7 @@ class TestLoggingHelper(unittest.TestCase):
         # create a temporary directory to store logs
         self.logs_dir = tempfile.mkdtemp()
         self.file_path = str(os.path.join(self.logs_dir, "test_log_wrapper.log"))
-        self.logger = LoggerWrapper(name="test_log_wrapper",
-                                    date_filename=False,
-                                    handlers=[logging.StreamHandler(), logging.FileHandler(self.file_path)])
+        self.logger = LoggerWrapper(name="test_log_wrapper")
 
     def tearDown(self):
         self.logger.remove_handler(logging.Handler)

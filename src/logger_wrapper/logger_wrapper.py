@@ -68,68 +68,61 @@ if __name__ == "__main__":
 __author__ = 'Erol Yesin'
 __version__ = '0.0.1'
 
+import traceback
 from collections.abc import Iterable
-from gettext import install
 import time
 import logging
 from logging import handlers as hdls
 from pathlib import PosixPath
 
 
-class LoggerWrapper(logging.Logger):
+class SingletonLogger(logging.Logger):
     """
-    A helper class that subclasses the Logger class from the logging module and
-    provides a configurable logger.
-    This logger supports both file and console output with a specified format.
+    Custom logger class with configurable options for handlers and output format.
 
-    Args:
-        name (str or PosixPath, optional): The name of the logger also the
-        prefix of the log files.
-        Defaults to None.
-
-        level (int, optional): the log level to set. Defaults to None.
-        Default to DEBUG.
-
-        date_filename (bool, optional): Whether or not to add a date to the
-        filename when saving logs to a file.
-        Defaults to True.
-
-        handlers (list, optional): List of handlers to add to the logger.
-        Defaults to [StreamHnadler].
-
-    Returns:
-        logging.Logger: A configured Logger instance.
+    Args (all optional):
+        name (str): The name of the logger.
+        app_name (str): The name of the application.
+        level (int): The log level to be set for the logger.
+        meta (bool): Whether or not to include metadata in the log output.
+        date_filename (bool): Whether or not to include the date in the log file name.
+        handlers (list[logging.Handler]): A list of logging handlers to be used by the logger.
     """
     __instance = None
 
+    @staticmethod
     def __new__(cls,
-                name: str | PosixPath = None,
+                name: str = None,
+                app_name: str = None,
                 level: int = logging.DEBUG,
                 meta: bool = True,
                 date_filename: bool = True,
-                handlers: Iterable[logging.Handler] = [logging.StreamHandler()]) -> logging.Logger:
+                handlers=None):
 
-        if LoggerWrapper.__instance is None:
+        if SingletonLogger.__instance is None:
+            SingletonLogger.__instance = logging.Logger(name, level)
+            SingletonLogger.__instance.setLevel(level)
 
-            LoggerWrapper.__instance = logging.getLogger(name=str(name))
-            LoggerWrapper.__instance.setLevel(level=level)
+            if handlers is None:
+                handlers = [logging.StreamHandler()]
 
-            if meta:
-                LoggerWrapper.__instance.formatter = logging.Formatter(
-                    '%(asctime)s,[%(levelname)s:pid=%(process)d:%(threadName)s:%(module)s:%(funcName)s:%(lineno)d],%(message)s')
-            else:
-                LoggerWrapper.__instance.formatter = logging.Formatter('%(asctime)s,%(message)s')
+            SingletonLogger.__instance.app_name = app_name
+            SingletonLogger.__instance.meta = meta
+            SingletonLogger.__instance.handlers = handlers
 
-            for handler in handlers:
+            for handler in SingletonLogger.__instance.handlers:
                 if not isinstance(handler, logging.Handler):
                     continue
                 if isinstance(handler, logging.FileHandler):
                     if date_filename:
                         handler_dict = handler.__dict__.copy()
                         handler.close()
+                        SingletonLogger.__instance.handlers.remove(handler)
                         del handler
-
                         name = PosixPath(handler_dict["baseFilename"])
+                        if name.exists():
+                            name.unlink()
+
                         name.parent.mkdir(parents=True, exist_ok=True)
 
                         sfx = name.suffix
@@ -145,14 +138,41 @@ class LoggerWrapper(logging.Logger):
                                                       delay=handler_dict["delay"],
                                                       errors=handler_dict["errors"])
 
-                handler.setFormatter(LoggerWrapper.__instance.formatter)
-                LoggerWrapper.__instance.addHandler(handler)
+                SingletonLogger.__instance.addHandler(hdlr=handler)
 
-            LoggerWrapper.__instance.get_output_path = cls.get_output_path
-            LoggerWrapper.__instance.remove_handler = cls.remove_handler
-            LoggerWrapper.__instance.version = cls.version
+            SingletonLogger.set_default_format(app_name=app_name)
+            SingletonLogger.__instance.get_output_path = SingletonLogger.get_output_path
+            SingletonLogger.__instance.remove_handler = SingletonLogger.remove_handler
+            SingletonLogger.__instance.version = SingletonLogger.version
+            SingletonLogger.__instance.set_default_format = SingletonLogger.set_default_format
 
-        return LoggerWrapper.__instance
+        return SingletonLogger.__instance
+
+    @classmethod
+    def set_default_format(cls, app_name: str = None):
+        """
+        Format the log message to a default format.
+
+        Args:
+            handler_type (logging.Handler): The handler type of interest.
+                                            If None all handlers' output path
+                                            will be returned in a list.
+        """
+        SingletonLogger.__instance.format_keys = ['%(asctime)s,']
+        if app_name is not None:
+            SingletonLogger.__instance.format_keys.append(f'{app_name},')
+        if SingletonLogger.__instance.meta:
+            SingletonLogger.__instance.format_keys.append('[%(levelname)s:')
+            SingletonLogger.__instance.format_keys.append('pid=%(process)d:')
+            SingletonLogger.__instance.format_keys.append('%(threadName)s:')
+            SingletonLogger.__instance.format_keys.append('%(module)s:')
+            SingletonLogger.__instance.format_keys.append('%(funcName)s:')
+            SingletonLogger.__instance.format_keys.append('%(lineno)d],')
+        SingletonLogger.__instance.format_keys.append('%(message)s')
+
+        SingletonLogger.__instance.formatter = logging.Formatter(''.join(SingletonLogger.__instance.format_keys))
+        for handler in SingletonLogger.__instance.handlers:
+            handler.setFormatter(SingletonLogger.__instance.formatter)
 
     @classmethod
     def get_output_path(cls, handler_type: logging.Handler = None) -> Iterable[str]:
@@ -166,7 +186,7 @@ class LoggerWrapper(logging.Logger):
         NOTE: Not fully tested
         """
         paths = []
-        for handler in LoggerWrapper.__instance.handlers:
+        for handler in SingletonLogger.__instance.handlers:
             if isinstance(handler, logging.Handler):
                 if handler_type and isinstance(handler, handler_type):
                     paths.append(str(handler.stream.name))
@@ -195,13 +215,12 @@ class LoggerWrapper(logging.Logger):
                                             If the top level handler (logging.Handler)
                                             is given, all handlers will be removed.
         """
-        for handler in LoggerWrapper.__instance.handlers:
+        for handler in SingletonLogger.__instance.handlers:
             if isinstance(handler, handler_type):
-                LoggerWrapper.__instance.handlers.remove(handler)
+                SingletonLogger.__instance.handlers.remove(handler)
 
-    @classmethod
     @property
-    def version(cls):
+    def version(self):
         """
         A property that returns the current version of this class.
 
@@ -211,22 +230,87 @@ class LoggerWrapper(logging.Logger):
         return __version__
 
 
+class LoggerWrapper(logging.Logger):
+    """
+    A helper class that subclasses the Logger class from the logging module and
+    provides a configurable logger.
+    This logger supports both file and console output with a specified format.
+
+    Args:
+        name (str, optional): The name of the logger also the
+        prefix of the log files.
+        Defaults to None.
+
+        app_name (str, optional): The name of the application.
+
+        instance_name (str, optional): The name of the LoggerWrapper instance.
+
+        level (int, optional): the log level to set. Defaults to None.
+        Default to DEBUG.
+
+        date_filename (bool, optional): Whether to add a date to the
+        filename when saving logs to a file.
+        Defaults to True.
+
+        handlers (list, optional): List of handlers to add to the logger.
+        Defaults to [StreamHnadler].
+
+    Returns:
+        logging.Logger: A configured Logger instance.
+    """
+
+    def __init__(self,
+                 name: str  = None,
+                 app_name: str = None,
+                 instance_name: str = None:
+                 level: int = logging.DEBUG,
+                 meta: bool = True,
+                 date_filename: bool = True,
+                 handlers=None):
+
+        super().__init__(name, level=level)
+        self.logger = SingletonLogger(name=name,
+                                      app_name=app_name,
+                                      level=level,
+                                      meta=meta,
+                                      date_filename=date_filename,
+                                      handlers=handlers)
+
+        if instance_name is not None:
+            text = traceback.extract_stack()[-2][3]
+            self.instance_name = text[:text.find('=')].strip()
+            self.instance_id = id(self)
+        else:
+            self.instance_name = instance_name
+
+    def _log(self, level, msg, args, exc_info=None, extra=None, stack_info=False):
+        """=
+        Log a message.
+        """
+        msg = f"{self.instance_name}: {msg}"
+        self.logger._log(level, msg, args, exc_info, extra, stack_info)
+
+
 if __name__ == "__main__":
     name = None
     handlers = [logging.StreamHandler(),
-                logging.FileHandler("test.logs"),
-                hdls.SysLogHandler(address='/dev/log'),
+                logging.FileHandler("test.logs")
                 ]
-    log = LoggerWrapper(name=name,
-                        level=logging.DEBUG,
-                        date_filename=True,
-                        meta=True,
-                        handlers=handlers)
+    log1 = LoggerWrapper(name="app", handlers=handlers)
 
-    print("version: " + log.version)
-    print(str(log.get_output_path()))
+    log2 = LoggerWrapper(name="test")
 
+    log1_name = log1.instance_name
+    log2_name = log1.instance_name
+
+    print(str(log2.get_output_path()))
+    print(str(log1.get_output_path()))
+
+    print(log2.version)
     for count in range(10):
         if count == 5:
-            log.remove_handler(logging.StreamHandler)
-        log.info("test of " + str(count))
+            log1.remove_handler(logging.StreamHandler)
+        log1.info("test of " + str(count))
+        log2.info("test of " + str(count))
+
+    print(log1.version)
