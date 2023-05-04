@@ -4,7 +4,7 @@
 
 This package provides a wrappers for the built - in logging.Logger:
 
-**PseudoSingletonLogger**
+**PseudoSingletonLogger::**
 
 The PseudoSingletonLogger class inherits the logging.Logger and
 instentiates a singleton for each logger name give.
@@ -15,22 +15,18 @@ If given the 'use_instance' flag a space is allocated for the instance name
 for the client class to inject during logging.
 The PsudoSigletonLogger class has the following methods::
 
-    *set_default_format(logger_name: str = None,*
-                       *app_name: str = None,*
-                       *use_instance: bool = False)*
+    *set_default_format(logger_name: str = None, app_name: str = None, use_instance: bool = False)*
     Sets the default logging format for the given logger_name.  If no logger_name
-    than the default is the last_logger instance used.
+    provided the loggger instance used.
 
-    *get_output_path(logger_name: str = None,*
-                     *handler_type: logging.Handler=None):*
-    Tries to retrieve a list of output targets of the handler that matches the
-    type passed in. If handler_type is None, all the output targets for all the
-    registered handlers are returned.
+    *get_output_path(logger_name: str = None, handler_type: logging.Handler=None):*
+    Tries to retrieve a list of output targets for the handler that matches the
+    type passed in. If handler_type is None, all the targets for all the registered
+    handlers are returned.
     If no logger_name than the default is the last_logger instance used.
     *NOTE:* Not fully tested for all handler types
 
-    *remove_handler(logger_name: str = None,*
-                    *handler_type: logging.Handler=None):*
+    *remove_handler(logger_name: str = None, handler_type: logging.Handler=None):*
     Removes the handlers that matches the type passed in. If the handler_type
     is None or the handler_type is not registered, none of the handlers will
     be removed.  If an abstract handler is given, all handler that have inherited
@@ -39,7 +35,7 @@ The PsudoSigletonLogger class has the following methods::
 
     *version():*  The package version.
 
-**LoggerWrapper:**
+**LoggerWrapper::**
 
 The LoggerWrapper class inherits the logging.Logger and retrieves the
 PsudoSigletonLogger class insance to pre-configure some of the common tasks like
@@ -68,20 +64,32 @@ The LoggerWrapper class has the following methods::
 <code >
 import logging
 from logging import handlers as hdls
+from pathlib import Path
 
 if __name__ == "__main__":
-    name = None
-    handlers = [logging.StreamHandler(), hdls.SysLogHandler(address='/dev/log')]
-    log = LoggerWrapper(name=name,
-                        app_name="main_test",
-                        handlers=handlers)
+    log_path = Path(".logs", "test.log")
+    if not log_path.parent.exists():
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+    handlers = [logging.StreamHandler(),
+                logging.FileHandler(log_path)]
+    log1 = LoggerWrapper(app_name="LoggerWrapper Demo",
+                         handlers=handlers,
+                         meta=True,
+                         date_filename=False)
 
-    print("version: " + log.version)
+    log2 = LoggerWrapper()
+    print(log2.version)
+
+    print(str(log1.get_output_path()))
 
     for count in range(10):
         if count == 5:
-            log.remove_handler(logging.StreamHandler)
-        log.info("test of " + str(count))
+            log1.remove_handler(logging.StreamHandler)
+        log1.info("test of " + str(count))
+        log2.info("test of " + str(count))
+
+    print(str(log2.get_output_path()))
+    print(log1.version)
 < / code >
 
     Copyright (c)  2023.  Erol Yesin/Sandboxzilla
@@ -109,7 +117,7 @@ from collections.abc import Iterable
 import time
 import logging
 from logging import handlers as hdls
-from pathlib import PosixPath
+from pathlib import Path, PosixPath
 
 
 class PseudoSingletonLogger(logging.Logger):
@@ -139,6 +147,7 @@ class PseudoSingletonLogger(logging.Logger):
 
         if name not in PseudoSingletonLogger.__instance or PseudoSingletonLogger.__instance[name] is None:
             __this_instance = logging.getLogger(name=name)
+            name = __this_instance.name
             __this_instance.setLevel(level)
 
             __this_instance.logger_name = name
@@ -242,11 +251,13 @@ class PseudoSingletonLogger(logging.Logger):
                                             will be returned in a list.
         NOTE: Not fully tested
         """
-        if logger_name is None:
-            logger_name = PseudoSingletonLogger.__last_instance.logger_name
+        if logger_name is None or logger_name not in PseudoSingletonLogger.__instance:
+            _local_logger = PseudoSingletonLogger.__last_instance
+        else:
+            _local_logger = PseudoSingletonLogger.__instance[logger_name]
 
         paths = []
-        for handler in PseudoSingletonLogger.__instance[logger_name].handlers:
+        for handler in _local_logger.handlers:
             if isinstance(handler, logging.Handler):
                 if handler_type and isinstance(handler, handler_type):
                     paths.append(str(handler.stream.name))
@@ -314,6 +325,10 @@ class LoggerWrapper(logging.Logger):
         level (int, optional): the log level to set. Defaults to None.
         Default to DEBUG.
 
+        meta (bool, optional): Flag indicated whether to adding location data
+        to the header.
+        Default to True.
+
         date_filename (bool, optional): Whether to add a date to the
         filename when saving logs to a file.
         Defaults to True.
@@ -326,7 +341,7 @@ class LoggerWrapper(logging.Logger):
     """
 
     def __init__(self,
-                 name: str  = None,
+                 name: str = 'root',
                  app_name: str = None,
                  instance_name: str = None,
                  level: int = logging.DEBUG,
@@ -384,29 +399,26 @@ class LoggerWrapper(logging.Logger):
 
 
 if __name__ == "__main__":
-    name = None
+    log_path = Path(".logs", "test.log")
+    if not log_path.parent.exists():
+        log_path.parent.mkdir(parents=True, exist_ok=True)
     handlers = [logging.StreamHandler(),
-                logging.FileHandler("test.log")
-                ]
-    log1 = LoggerWrapper(name="app",
-                         app_name="main",
+                logging.FileHandler(log_path)]
+    log1 = LoggerWrapper(app_name="LoggerWrapper Demo",
                          handlers=handlers,
                          meta=True,
                          date_filename=False)
 
     log2 = LoggerWrapper()
+    print(log2.version)
 
-    log1_name = log1.instance_name
-    log2_name = log2.instance_name
-
-    print(str(log2.get_output_path()))
     print(str(log1.get_output_path()))
 
-    print(log2.version)
     for count in range(10):
         if count == 5:
             log1.remove_handler(logging.StreamHandler)
         log1.info("test of " + str(count))
         log2.info("test of " + str(count))
 
+    print(str(log2.get_output_path()))
     print(log1.version)

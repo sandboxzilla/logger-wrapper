@@ -122,16 +122,6 @@ class LoggerWrapperTest(unittest.TestCase):
     A class for unit testing the LoggerWrapper class.
     """
 
-    def setUp(self):
-        """Create a new instance of LoggerWrapper for each test."""
-        pass
-        # self.handlers = [logging.StreamHandler(), logging.FileHandler("test.log")]
-        # self.logger = LoggerWrapper(app_name="testLoggerWrapper",
-        #                             instance_name="lwUnitTest",
-        #                             handlers=self.handlers,
-        #                             meta=True,
-        #                             date_filename=False)
-
     def test_console_logging(self):
         """
         Tests that the LoggerWrapper class correctly logs messages to the console.
@@ -155,7 +145,7 @@ class LoggerWrapperTest(unittest.TestCase):
                                handlers=handlers)
 
         logger.info("test message added to file")
-        with open(temp_file.name, "r") as f:
+        with open(temp_file.name, encoding="utf-8", mode="r") as f:
             contents = f.read()
         self.assertIn("test message added to file", contents)
 
@@ -172,35 +162,38 @@ class LoggerWrapperTest(unittest.TestCase):
                                handlers=handlers)
 
         logger.info("test message 1 added to file")
-        with open(temp_file.name, "r") as f:
+        with open(temp_file.name, encoding="utf-8", mode="r") as f:
             contents = f.read()
         self.assertNotIn("new_instance_name", contents)
 
         logger.change_instance_name("new_instance_name")
 
         logger.info("test message 2 added to file")
-        with open(temp_file.name, "r") as f:
+        with open(temp_file.name, encoding="utf-8", mode="r") as f:
             contents = f.read()
 
         self.assertIn("new_instance_name", contents)
 
     def test_log_message(self):
         """Ensure that the LoggerWrapper logs messages correctly"""
+        level = "DEBUG"
+        message = "Test message"
+        instance_name = "test_log_message"
         temp_file = tempfile.NamedTemporaryFile()
         handlers = [logging.StreamHandler(), logging.FileHandler(temp_file.name)]
-        logger = LoggerWrapper(name="test_log_message",
-                               instance_name="test_log_message",
+        logger = LoggerWrapper(name=instance_name,
+                               instance_name=instance_name,
                                date_filename=False,
                                handlers=handlers)
 
-        logger.log(level=10, msg="Test message")
+        logger.log(level=logging._nameToLevel[level], msg=message)
         # You can then check the log file to make sure that the message was logged correctly
         # For example:
-        with open(temp_file.name) as f:
+        with open(temp_file.name, encoding="utf-8", mode="r") as f:
             content = f.read()
-        self.assertIn("DEBUG", content)
-        self.assertIn("Test message", content)
-        self.assertIn("test_log_message", content)
+        self.assertIn(level, content)
+        self.assertIn(message, content)
+        self.assertIn(instance_name, content)
         self.assertIn("MainThread", content)
         self.assertIn("test_logger_wrapper", content)
 
@@ -217,7 +210,7 @@ class LoggerWrapperTest(unittest.TestCase):
                                handlers=handlers)
 
         logger.debug(message)
-        with open(temp_file.name) as f:
+        with open(temp_file.name, encoding="utf-8", mode="r") as f:
             content = f.read()
         self.assertIn(level, content)
         self.assertIn(message, content)
@@ -237,7 +230,7 @@ class LoggerWrapperTest(unittest.TestCase):
                                handlers=handlers)
 
         logger.info(message)
-        with open(temp_file.name) as f:
+        with open(temp_file.name, encoding="utf-8", mode="r") as f:
             content = f.read()
         self.assertIn(level, content)
         self.assertIn(message, content)
@@ -257,7 +250,7 @@ class LoggerWrapperTest(unittest.TestCase):
                                handlers=handlers)
 
         logger.warning(message)
-        with open(temp_file.name) as f:
+        with open(temp_file.name, encoding="utf-8", mode="r") as f:
             content = f.read()
         self.assertIn(level, content)
         self.assertIn(message, content)
@@ -277,7 +270,7 @@ class LoggerWrapperTest(unittest.TestCase):
                                handlers=handlers)
 
         logger.error(message)
-        with open(temp_file.name) as f:
+        with open(temp_file.name, encoding="utf-8", mode="r") as f:
             content = f.read()
         self.assertIn(level, content)
         self.assertIn(message, content)
@@ -297,7 +290,7 @@ class LoggerWrapperTest(unittest.TestCase):
                                handlers=handlers)
 
         logger.critical(message)
-        with open(temp_file.name) as f:
+        with open(temp_file.name, encoding="utf-8", mode="r") as f:
             content = f.read()
         self.assertIn(level, content)
         self.assertIn(message, content)

@@ -1,22 +1,24 @@
 #!/bin/python3
 
 """
-log_helper package
+logger_wrapper package
 
-Author: Erol Yesin
-Version: 0.0.1
+Author: Erol Yesin/Sandboxzilla
+Version: 0.1.0
 
 This package provides a wrapper for the built-in logging packages:
 
-1.  LoggingHelper: A class for creating and managing events with callback
-    routines.
-    This class can be used independently of TimerEvent for handling
-    general event-driven scenarios without any time-based requirements.
+1.  PseudoSingletonLogger: A class that wraps the logging.Logger to hrlp stadarize the log entries.
 
-For detailed documentation and example usage on each class, refer to their
-respective module files.
+2.  LoggerWrapper: A class that wraps the logging.Logger.
+    This class injects instance name into a standarized log messages.
+    This class uses the PseudoSingletonLogger class.
+    Using this class, you can set the instance name in the logger.
+    This class uses the logging.Logger class.
 
-Copyright (c) 2023.  Erol Yesin/SandboxZilla
+For detailed documentation and example usage, refer to the README.md file.
+
+Copyright (c) 2023. Erol Yesin/SandboxZilla
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
