@@ -156,3 +156,4 @@ cython_debug/
 *.logs
 *.log
 scratch.py
+~/workspace/venvs
