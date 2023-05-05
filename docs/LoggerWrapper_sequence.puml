@@ -1,0 +1,21 @@
+@startuml
+  participant "ClientCode\nInstance" as code
+  participant "LoggerWrapper\nInstance" as lw
+  participant "PseudoSingletonLogger" as psl
+  participant "logging.Handler" as handler
+  participant "logging.Formatter" as formatter
+
+  code -> lw : Instantiate LoggerWrapper
+  code -> lw : debug(msg)
+  lw -> lw : insert instance name as extra
+  lw -> psl : _log(level, msg, extra)
+  psl -> handler : handle(record)
+  handler -> formatter : format(record)
+  formatter -> formatter : formatMessage(record)
+  formatter -> formatter : formatTime(record)
+  formatter -> formatter : formatHeader(record)
+  formatter -> handler : handleMessage(record)
+  handler -> handler : emit(record)
+  note right of handler : Log message is output\nto log file or console
+
+@enduml

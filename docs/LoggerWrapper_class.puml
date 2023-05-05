@@ -1,0 +1,31 @@
+@startuml
+
+class logging.Logger {
++_log(level, msg, extra) : None
++log(level, msg, extra)
++debug(msg)
++info(msg)
++warning(msg)
++error(msg)
++critical(msg)
+}
+
+class PseudoSingletonLogger {
+-__instance : dict
+-__last_instance : PseudoSingletonLogger
++set_default_format(logger_name, app_name, use_instance) : None
++get_output_path(logger_name, handler_type) : Iterable[str]
++remove_handler(handler_type, logger_name) : None
++version : str
+}
+
+class LoggerWrapper {
+-logger : PseudoSingletonLogger
++change_instance_name(instance_name) : None
++_log(level, msg, extra) : None
+}
+
+logging.Logger <|-- PseudoSingletonLogger
+logging.Logger <|-- LoggerWrapper
+
+@enduml
